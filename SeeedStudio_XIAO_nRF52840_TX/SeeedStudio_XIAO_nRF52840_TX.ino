@@ -2,6 +2,13 @@
 #include <U8x8lib.h>
 #include <Wire.h>
 
+/*
+ * NOTE on built in Seeeduino LEDs:
+ * You first have to understand that the behavior of this LED is not as usual when controlled by the code.
+ * The LED turns ON when we give a LOW signal and it turns OFF when we give a HIGH signal. 
+ * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
+ */
+
 boolean debug = 0;
 
 BLEDevice peripheral;
