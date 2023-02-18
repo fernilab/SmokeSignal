@@ -2,16 +2,35 @@
 #include <U8x8lib.h>
 #include <Wire.h>
 
+boolean debug = 0;
+
+BLEDevice peripheral;
+
 // variables for button
 const int buttonPin = D1;
 int oldButtonState = LOW;
 
+// Set LED
+const int ledR = LEDR; // pin to use for RED LED
+const int ledG = LEDG; // pin to use for GREEN LED
+const int ledB = LEDB; // pin to use for BLUE LED
+
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
-
+  if (debug) {
+    while (!Serial);
+  }
   // configure the button pin as input
   pinMode(buttonPin, INPUT_PULLUP);
+
+  // set LED pins to output mode
+  // Red is on, Green and Blue are off
+  pinMode(ledR, OUTPUT);
+  pinMode(ledG, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  digitalWrite(ledR, LOW);
+  digitalWrite(ledG, HIGH);
+  digitalWrite(ledB, HIGH);
 
   // initialize the Bluetooth® Low Energy hardware
   BLE.begin();
@@ -24,7 +43,7 @@ void setup() {
 
 void loop() {
   // check if a peripheral has been discovered
-  BLEDevice peripheral = BLE.available();
+  peripheral = BLE.available();
   if (peripheral) {
     // discovered a peripheral, print out address, local name, and advertised service
     Serial.print("Found ");
@@ -47,7 +66,7 @@ void loop() {
     // peripheral disconnected, start scanning again
     BLE.scanForName("XIAO");
   }
-  delay(100);
+  delay(500);
 }
 
 void system_control(BLEDevice peripheral) {
@@ -56,8 +75,15 @@ void system_control(BLEDevice peripheral) {
 
   if (peripheral.connect()) {
     Serial.println("Connected");
+    // We are now connected so turn off RED LED and blink GREEN for 3 seconds
+    digitalWrite(ledR, HIGH);
+    digitalWrite(ledG, LOW);
+    delay(3000);
+    digitalWrite(ledG, HIGH);
   } else {
     Serial.println("Failed to connect!");
+    // We got disconnected so turn on red again
+    digitalWrite(ledR, LOW);
     return;
   }
 
@@ -72,7 +98,7 @@ void system_control(BLEDevice peripheral) {
   }
 
   // retrieve the LED characteristic
-  BLECharacteristic ledCharacteristic = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1214");
+  BLECharacteristic ledCharacteristic = peripheral.characteristic("12b665c3-6546-4d19-8a87-cb2caa590510");
 
   if (!ledCharacteristic) {
     Serial.println("Peripheral does not have LED characteristic!");
@@ -94,18 +120,20 @@ void system_control(BLEDevice peripheral) {
       oldButtonState = buttonState;
 
       if (buttonState) {
-        Serial.println("button pressed");
-
-        // button is pressed, write 0x01 to turn the LED on
-        ledCharacteristic.writeValue((byte)0x01);
-      } else {
         Serial.println("button released");
-
-        // button is released, write 0x00 to turn the LED off
+        // write 0x01 to turn the LED on
         ledCharacteristic.writeValue((byte)0x00);
+        digitalWrite(ledB, HIGH);
+      } else {
+        Serial.println("button pressed");
+        // write 0x00 to turn the LED off
+        ledCharacteristic.writeValue((byte)0x01);
+        digitalWrite(ledB, LOW);
       }
     }
   }
 
   Serial.println("Peripheral disconnected");
+  // We got disconnected so turn on red again
+  digitalWrite(ledR, LOW);
 }
