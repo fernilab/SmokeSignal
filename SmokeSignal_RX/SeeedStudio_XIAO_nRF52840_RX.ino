@@ -6,7 +6,10 @@ boolean debug = 0;
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
 // Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("12b665c3-6546-4d19-8a87-cb2caa590510", BLERead | BLEWrite);
- 
+
+// variables for button
+const int ledOut = D1;
+
 // Set LED
 const int ledR = LEDR; // pin to use for RED LED
 const int ledG = LEDG; // pin to use for GREEN LED
@@ -23,9 +26,11 @@ void setup() {
   pinMode(ledR, OUTPUT);
   pinMode(ledG, OUTPUT);
   pinMode(ledB, OUTPUT);
+  pinMode(ledOut, OUTPUT);
   digitalWrite(ledR, LOW);
   digitalWrite(ledG, HIGH);
   digitalWrite(ledB, HIGH);
+  digitalWrite(ledOut, LOW);
  
   // begin initialization
   if (!BLE.begin()) {
@@ -81,10 +86,12 @@ void loop() {
       if (switchCharacteristic.written()) {
         if (switchCharacteristic.value()) {  // any value other than 0
           Serial.println("LED On");
-          digitalWrite(ledB, LOW);          // will turn the LED on
+          digitalWrite(ledB, LOW);           // will turn the LED on
+          digitalWrite(ledOut, HIGH);           // turn on external LED
         } else {                             // a 0 value
           Serial.println(F("LED Off"));
-          digitalWrite(ledB, HIGH);           // will turn the LED off
+          digitalWrite(ledB, HIGH);          // will turn the LED off
+          digitalWrite(ledOut, LOW);          // turn off external LED
         }
       }
     }
