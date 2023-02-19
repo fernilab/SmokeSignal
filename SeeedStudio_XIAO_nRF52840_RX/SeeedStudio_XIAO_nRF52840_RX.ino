@@ -12,12 +12,12 @@ boolean debug = 0;
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
 // Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
-BLEByteCharacteristic switchCharacteristic("12b665c3-6546-4d19-8a87-cb2caa590510", BLERead | BLEWrite);
+BLEByteCharacteristic switchCharacteristic("12b665c4-6546-4d19-8a87-cb2caa590510", BLERead | BLEWrite);
 
-// variables for button
+// Variables for buttons
 const int ledOut = D1;
 
-// Set LED
+// Set LEDs
 const int ledR = LEDR; // pin to use for RED LED
 const int ledG = LEDG; // pin to use for GREEN LED
 const int ledB = LEDB; // pin to use for BLUE LED

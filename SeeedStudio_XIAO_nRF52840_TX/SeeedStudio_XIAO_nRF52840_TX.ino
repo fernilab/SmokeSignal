@@ -105,7 +105,7 @@ void system_control(BLEDevice peripheral) {
   }
 
   // retrieve the LED characteristic
-  BLECharacteristic ledCharacteristic = peripheral.characteristic("12b665c3-6546-4d19-8a87-cb2caa590510");
+  BLECharacteristic ledCharacteristic = peripheral.characteristic("12b665c4-6546-4d19-8a87-cb2caa590510");
 
   if (!ledCharacteristic) {
     Serial.println("Peripheral does not have LED characteristic!");
