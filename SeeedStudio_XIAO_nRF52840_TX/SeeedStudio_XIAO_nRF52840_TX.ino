@@ -11,6 +11,9 @@
 
 boolean debug = 0;
 
+// This counter will go up approximately every 100 millis, at 50 (5000ms) we restart the scan
+int retries = 0;  
+
 BLEDevice peripheral;
 
 // Set buttons
@@ -73,7 +76,14 @@ void loop() {
     // peripheral disconnected, start scanning again
     BLE.scanForName("SmokeSignal Peripheral");
   }
-  delay(500);
+  if (retries > 50) {
+    Serial.println("Restart Scan...");
+    BLE.stopScan();
+    BLE.scanForName("SmokeSignal Peripheral");
+    retries = 0;
+  }
+  retries++;
+  delay(100);
 }
 
 void system_control(BLEDevice peripheral) {

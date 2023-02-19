@@ -54,9 +54,16 @@ void setup() {
  
   // add service
   BLE.addService(ledService);
+
  
-  // set the initial value for the characeristic:
-  switchCharacteristic.writeValue(0);
+  // assign event handlers for connected, disconnected to peripheral
+  BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
+  BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
+
+  // assign event handlers for characteristic
+  switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten);
+  // set an initial value for the characteristic
+  switchCharacteristic.setValue(0);
  
   // start advertising
   BLE.advertise();
@@ -67,45 +74,39 @@ void setup() {
  
   Serial.println("SmokeSignal nRF52840 Peripheral");
 }
- 
+
 void loop() {
-  // listen for Bluetooth® Low Energy peripherals to connect:
-  BLEDevice central = BLE.central();
-  // RED LED is on unless we are connected
+  // poll for Bluetooth® Low Energy events
+  BLE.poll();
+}
+
+void blePeripheralConnectHandler(BLEDevice central) {
+  // central connected event handler
+  Serial.print("Connected to central: ");
+  Serial.println(central.address());
+  digitalWrite(ledR, HIGH);
+  digitalWrite(ledG, LOW);
+  delay(3000);
+  digitalWrite(ledG, HIGH);
+}
+
+void blePeripheralDisconnectHandler(BLEDevice central) {
+  // central disconnected event handler
+  Serial.print("Disconnected from central: ");
+  Serial.println(central.address());
   digitalWrite(ledR, LOW);
- 
-  // if a central is connected to peripheral:
-  if (central) {
-    Serial.print("Connected to central: ");
-    // print the central's MAC address:
-    Serial.println(central.address());
-    // We are now connected so turn off RED LED and blink GREEN for 3 seconds
-    digitalWrite(ledR, HIGH);
-    digitalWrite(ledG, LOW);
-    delay(3000);
-    digitalWrite(ledG, HIGH);
- 
-    // while the central is still connected to peripheral:
-    while (central.connected()) {
-      // if the remote device wrote to the characteristic,
-      // use the value to control the LED:
-      if (switchCharacteristic.written()) {
-        if (switchCharacteristic.value()) {  // any value other than 0
-          Serial.println("LED On");
-          digitalWrite(ledB, LOW);           // will turn the LED on
-          digitalWrite(ledOut, HIGH);           // turn on external LED
-        } else {                             // a 0 value
-          Serial.println(F("LED Off"));
-          digitalWrite(ledB, HIGH);          // will turn the LED off
-          digitalWrite(ledOut, LOW);          // turn off external LED
-        }
-      }
-    }
- 
-    // when the central disconnects, print it out:
-    Serial.print(F("Disconnected from central: "));
-    Serial.println(central.address());
-    // We got disconnected so turn on red again
-    digitalWrite(ledR, LOW);
+}
+
+void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
+  // central wrote new value to characteristic, update LED
+  Serial.print("Characteristic event: ");
+  if (switchCharacteristic.value()) {  // any value other than 0
+    Serial.println("LED On");
+    digitalWrite(ledB, LOW);           // will turn the LED on
+    digitalWrite(ledOut, HIGH);        // turn on external LED
+  } else {                             // a 0 value
+    Serial.println(F("LED Off"));
+    digitalWrite(ledB, HIGH);          // will turn the LED off
+    digitalWrite(ledOut, LOW);         // turn off external LED
   }
 }
