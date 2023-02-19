@@ -9,15 +9,15 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 0;
+boolean debug = 1;
 
 BLEDevice peripheral;
 
-// variables for button
+// Set buttons
 const int buttonPin = D1;
 int oldButtonState = LOW;
 
-// Set LED
+// Set LEDs
 const int ledR = LEDR; // pin to use for RED LED
 const int ledG = LEDG; // pin to use for GREEN LED
 const int ledB = LEDB; // pin to use for BLUE LED
@@ -45,7 +45,7 @@ void setup() {
   Serial.println("Bluetooth® Low Energy Central - LED control");
 
   // start scanning for peripherals
-  BLE.scanForName("XIAO");
+  BLE.scanForName("SmokeSignal Peripheral");
 }
 
 void loop() {
@@ -61,7 +61,7 @@ void loop() {
     Serial.print(peripheral.advertisedServiceUuid());
     Serial.println();
 
-    if (peripheral.localName() != "XIAO") {
+    if (peripheral.localName() != "SmokeSignal Peripheral") {
       return;
     }
 
@@ -71,7 +71,7 @@ void loop() {
     system_control(peripheral);
 
     // peripheral disconnected, start scanning again
-    BLE.scanForName("XIAO");
+    BLE.scanForName("SmokeSignal Peripheral");
   }
   delay(500);
 }

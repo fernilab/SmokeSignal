@@ -7,7 +7,7 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 0;
+boolean debug = 1;
 
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
@@ -42,12 +42,11 @@ void setup() {
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting Bluetooth® Low Energy module failed!");
- 
     while (1);
   }
  
   // set advertised local name and service UUID:
-  BLE.setLocalName("XIAO");
+  BLE.setLocalName("SmokeSignal Peripheral");
   BLE.setAdvertisedService(ledService);
  
   // add the characteristic to the service
@@ -66,7 +65,7 @@ void setup() {
   Serial.print("Address: ");
   Serial.println(BLE.address());
  
-  Serial.println("XIAO nRF52840 Peripheral");
+  Serial.println("SmokeSignal nRF52840 Peripheral");
 }
  
 void loop() {
