@@ -9,7 +9,7 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 1;
+boolean debug = 0;
 
 BLEDevice peripheral;
 

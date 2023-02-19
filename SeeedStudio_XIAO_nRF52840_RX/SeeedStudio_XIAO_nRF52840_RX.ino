@@ -7,7 +7,7 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 1;
+boolean debug = 0;
 
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
