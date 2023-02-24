@@ -9,16 +9,20 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 0;
+boolean debug = 1;
 
 // This counter will go up approximately every 100 millis, at 50 (5000ms) we restart the scan
 int retries = 0;  
 
 BLEDevice peripheral;
 
+unsigned long switchClick = millis();
+unsigned long switchOld   = millis();
+unsigned long switchNow   = millis();
+
 // Set buttons
 const int buttonPin = D1;
-int oldButtonState = LOW;
+int oldButtonState  = LOW;
 
 // Set LEDs
 const int ledR = LEDR; // pin to use for RED LED
@@ -131,6 +135,7 @@ void system_control(BLEDevice peripheral) {
     // while the peripheral is connected
     // read the button pin
     int buttonState = digitalRead(buttonPin);
+    const unsigned long clickDebounce = 500;
 
     if (oldButtonState != buttonState) {
       // button changed
@@ -138,14 +143,25 @@ void system_control(BLEDevice peripheral) {
 
       if (buttonState) {
         Serial.println("button released");
-        // write 0x01 to turn the LED on
+        // write 0x00 to turn the LED off
         ledCharacteristic.writeValue((byte)0x00);
         digitalWrite(ledB, HIGH);
       } else {
         Serial.println("button pressed");
-        // write 0x00 to turn the LED off
+        // write 0x01 to turn the LED on
         ledCharacteristic.writeValue((byte)0x01);
         digitalWrite(ledB, LOW);
+        // If there is a double-click enter the loop
+        if (checkClick()) {
+          Serial.println("Hold on");
+          delay(clickDebounce);
+          while(true) {
+            if(!digitalRead(buttonPin)) {
+              Serial.println("New button press.");
+              break;
+            }
+          }
+        }
       }
     }
   }
@@ -153,4 +169,22 @@ void system_control(BLEDevice peripheral) {
   Serial.println("Peripheral disconnected");
   // We got disconnected so turn on red again
   digitalWrite(ledR, LOW);
+}
+
+int checkClick(void) {
+  const unsigned long clickPeriod = 400;  // Any two clicks under 400 microseconds is a double-click
+  switchNow = millis();
+  if (switchOld && (switchNow - switchOld) <= clickPeriod) {
+    Serial.println("Double click");
+    Serial.println(switchOld);
+    Serial.println(switchNow);
+    switchOld = switchNow;
+    return 1;
+  } else {
+    Serial.println("Single click");
+    Serial.println(switchOld);
+    Serial.println(switchNow);
+    switchOld = switchNow;
+    return 0;
+  }
 }
