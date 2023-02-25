@@ -9,25 +9,22 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 1;
-
-// This counter will go up approximately every 100 millis, at 50 (5000ms) we restart the scan
-int retries = 0;  
+boolean debug = false;
 
 BLEDevice peripheral;
 
-unsigned long switchClick = millis();
+// This will be used to check double-clicks
 unsigned long switchOld   = millis();
 unsigned long switchNow   = millis();
 
 // Set buttons
-const int buttonPin = D1;
+const int buttonPin = D0;
 int oldButtonState  = LOW;
 
 // Set LEDs
-const int ledR = LEDR; // pin to use for RED LED
-const int ledG = LEDG; // pin to use for GREEN LED
-const int ledB = LEDB; // pin to use for BLUE LED
+const int ledR = LEDR;  // pin to use for RED LED
+const int ledG = LEDG;  // pin to use for GREEN LED
+const int ledB = LEDB;  // pin to use for BLUE LED
 
 void setup() {
   Serial.begin(9600);
@@ -51,43 +48,58 @@ void setup() {
 
   Serial.println("Bluetooth® Low Energy Central - LED control");
 
+  // set the discovered event handle
+  BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);
+
   // start scanning for peripherals
   BLE.scanForName("SmokeSignal Peripheral");
 }
 
 void loop() {
-  // check if a peripheral has been discovered
-  peripheral = BLE.available();
-  if (peripheral) {
-    // discovered a peripheral, print out address, local name, and advertised service
-    Serial.print("Found ");
-    Serial.print(peripheral.address());
-    Serial.print(" '");
-    Serial.print(peripheral.localName());
-    Serial.print("' ");
-    Serial.print(peripheral.advertisedServiceUuid());
-    Serial.println();
+  BLE.poll();
+}
 
-    if (peripheral.localName() != "SmokeSignal Peripheral") {
-      return;
+void bleCentralDiscoverHandler(BLEDevice peripheral) {
+  // discovered a peripheral
+  Serial.println("Discovered a peripheral");
+  Serial.println("-----------------------");
+
+  // print address
+  Serial.print("Address: ");
+  Serial.println(peripheral.address());
+
+  // print the local name, if present
+  if (peripheral.hasLocalName()) {
+    Serial.print("Local Name: ");
+    Serial.println(peripheral.localName());
+  }
+
+  // print the advertised service UUIDs, if present
+  if (peripheral.hasAdvertisedServiceUuid()) {
+    Serial.print("Service UUIDs: ");
+    for (int i = 0; i < peripheral.advertisedServiceUuidCount(); i++) {
+      Serial.print(peripheral.advertisedServiceUuid(i));
+      Serial.print(" ");
     }
-
-    // stop scanning
-    BLE.stopScan();
-
-    system_control(peripheral);
-
-    // peripheral disconnected, start scanning again
-    BLE.scanForName("SmokeSignal Peripheral");
+    Serial.println();
   }
-  if (retries > 50) {
-    Serial.println("Restart Scan...");
-    BLE.stopScan();
-    BLE.scanForName("SmokeSignal Peripheral");
-    retries = 0;
+
+  // print the RSSI
+  Serial.print("RSSI: ");
+  Serial.println(peripheral.rssi());
+  
+  if (peripheral.localName() != "SmokeSignal Peripheral") {
+    Serial.print("Not SmokeSignal...");
+    return;
   }
-  retries++;
-  delay(100);
+
+  // stop scanning
+  BLE.stopScan();
+
+  system_control(peripheral);
+
+  // peripheral disconnected, start scanning again
+  BLE.scanForName("SmokeSignal Peripheral");
 }
 
 void system_control(BLEDevice peripheral) {
@@ -153,8 +165,7 @@ void system_control(BLEDevice peripheral) {
         digitalWrite(ledB, LOW);
         // If there is a double-click enter the loop
         if (checkClick()) {
-          Serial.println("Hold on");
-          delay(clickDebounce);
+          delay(clickDebounce);  // We use this for button debounce
           while(true) {
             if(!digitalRead(buttonPin)) {
               Serial.println("New button press.");
@@ -175,16 +186,12 @@ int checkClick(void) {
   const unsigned long clickPeriod = 400;  // Any two clicks under 400 microseconds is a double-click
   switchNow = millis();
   if (switchOld && (switchNow - switchOld) <= clickPeriod) {
-    Serial.println("Double click");
-    Serial.println(switchOld);
-    Serial.println(switchNow);
     switchOld = switchNow;
+    Serial.println("Double click");
     return 1;
   } else {
-    Serial.println("Single click");
-    Serial.println(switchOld);
-    Serial.println(switchNow);
     switchOld = switchNow;
+    Serial.println("Single click");
     return 0;
   }
 }

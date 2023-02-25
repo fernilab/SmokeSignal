@@ -7,7 +7,7 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
-boolean debug = 0;
+boolean debug = false;
 
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
@@ -15,12 +15,12 @@ BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
 BLEByteCharacteristic switchCharacteristic("12b665c4-6546-4d19-8a87-cb2caa590510", BLERead | BLEWrite);
 
 // Variables for buttons
-const int ledOut = D1;
+const int ledOut = D0;
 
 // Set LEDs
-const int ledR = LEDR; // pin to use for RED LED
-const int ledG = LEDG; // pin to use for GREEN LED
-const int ledB = LEDB; // pin to use for BLUE LED
+const int ledR = LEDR;  // pin to use for RED LED
+const int ledG = LEDG;  // pin to use for GREEN LED
+const int ledB = LEDB;  // pin to use for BLUE LED
 
 void setup() {
   Serial.begin(9600);
@@ -54,7 +54,6 @@ void setup() {
  
   // add service
   BLE.addService(ledService);
-
  
   // assign event handlers for connected, disconnected to peripheral
   BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
@@ -71,7 +70,6 @@ void setup() {
   // print address
   Serial.print("Address: ");
   Serial.println(BLE.address());
- 
   Serial.println("SmokeSignal nRF52840 Peripheral");
 }
 
@@ -101,7 +99,7 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
   // central wrote new value to characteristic, update LED
   Serial.print("Characteristic event: ");
   if (switchCharacteristic.value()) {  // any value other than 0
-    Serial.println("LED On");
+    Serial.println(F("LED On"));
     digitalWrite(ledB, LOW);           // will turn the LED on
     digitalWrite(ledOut, HIGH);        // turn on external LED
   } else {                             // a 0 value
