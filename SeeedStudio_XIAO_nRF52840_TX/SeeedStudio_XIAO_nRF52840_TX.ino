@@ -8,9 +8,23 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
+/*
+* Needs a modified ArduinoCore-mbed. Look at https://github.com/Seeed-Studio/ArduinoCore-mbed/issues/13
+* There is an issue with using LEDG and reading PIN_VBAT in 2.9.1
+*/
+
 boolean debug = false;
 
 BLEDevice peripheral;
+
+// How often should we read battery levels? Right now it is set to 10 minutes.
+const unsigned long checkBatteryDelay = 5000;
+const unsigned long blinkDelay        = 2500;
+unsigned long nowMillis         = millis();
+unsigned long startMillisBatt   = millis();
+unsigned long startMillisBlinkR = millis();
+const int battLow = 410;
+int lowBattery = 0;
 
 // This will be used to check double-clicks
 unsigned long switchOld   = millis();
@@ -41,6 +55,11 @@ void setup() {
   digitalWrite(ledR, LOW);
   digitalWrite(ledG, HIGH);
   digitalWrite(ledB, HIGH);
+ 
+  // Enable battery monitoring
+  pinMode(PIN_VBAT, INPUT);            //Battery Voltage monitoring pin
+  pinMode(PIN_VBAT_ENABLE, OUTPUT);    //Enable Battery Voltage monitoring pin
+  digitalWrite(PIN_VBAT_ENABLE, LOW);  //Enable
 
   // initialize the Bluetooth® Low Energy hardware
   BLE.begin();
@@ -55,7 +74,13 @@ void setup() {
 }
 
 void loop() {
+  // poll for Bluetooth® Low Energy events
   BLE.poll();
+  nowMillis = millis();
+  if ((nowMillis - startMillisBatt) >= checkBatteryDelay) {
+    checkVoltage();
+  }
+  blinkRed();
 }
 
 void bleCentralDiscoverHandler(BLEDevice peripheral) {
@@ -192,5 +217,31 @@ int checkClick(void) {
     switchOld = switchNow;
     Serial.println("Single click");
     return 0;
+  }
+}
+
+void checkVoltage() {
+  float voltage = analogRead(PIN_VBAT);
+  Serial.print("Voltage: ");
+  Serial.println(voltage);
+  startMillisBatt = millis();
+  if (voltage < battLow) {
+    lowBattery = 1;  // Set the global variable to blink red when battery is low.
+  } else {
+    lowBattery = 0;
+  }
+}
+
+void blinkRed() {
+  int ledRstatus;
+  if (lowBattery && (nowMillis - startMillisBlinkR) >= blinkDelay) {
+    if (digitalRead(ledR)) {
+      digitalWrite(ledR, LOW);  // will turn the LED on
+      digitalWrite(ledG, LOW);
+    } else {
+      digitalWrite(ledR, HIGH);  // will turn the LED off
+      digitalWrite(ledG, HIGH);
+    }
+    startMillisBlinkR = millis();
   }
 }
