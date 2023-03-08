@@ -1,5 +1,4 @@
 #include <ArduinoBLE.h>
-#include <U8x8lib.h>
 #include <Wire.h>
 
 /*
@@ -111,7 +110,7 @@ void system_control(BLEDevice peripheral) {
     // We are now connected so turn off RED LED and blink GREEN for 3 seconds
     digitalWrite(ledR, HIGH);
     digitalWrite(ledG, LOW);
-    delay(3000);
+    delay(500);
     digitalWrite(ledG, HIGH);
   } else {
     Serial.println("Failed to connect!");

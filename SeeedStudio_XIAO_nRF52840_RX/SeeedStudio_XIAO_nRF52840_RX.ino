@@ -84,7 +84,7 @@ void blePeripheralConnectHandler(BLEDevice central) {
   Serial.println(central.address());
   digitalWrite(ledR, HIGH);
   digitalWrite(ledG, LOW);
-  delay(3000);
+  delay(500);
   digitalWrite(ledG, HIGH);
 }
 
