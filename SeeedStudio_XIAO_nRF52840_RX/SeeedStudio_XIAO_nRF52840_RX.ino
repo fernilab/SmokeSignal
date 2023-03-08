@@ -7,12 +7,26 @@
  * This is because this LED is controlled by a common anode and will light up only with a low-level signal.
  */
 
+/*
+ * Needs a modified ArduinoCore-mbed. Look at https://github.com/Seeed-Studio/ArduinoCore-mbed/issues/13
+ * There is an issue with using LEDG and reading PIN_VBAT in 2.9.1
+ */
+
 boolean debug = false;
 
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
 // Bluetooth® Low Energy LED Switch Characteristic - custom 128-bit UUID, read and writable by central
 BLEByteCharacteristic switchCharacteristic("12b665c4-6546-4d19-8a87-cb2caa590510", BLERead | BLEWrite);
+
+// How often should we read battery levels? Right now it is set to 10 minutes.
+const unsigned long checkBatteryDelay = 5000;
+const unsigned long blinkDelay        = 2500;
+unsigned long nowMillis         = millis();
+unsigned long startMillisBatt   = millis();
+unsigned long startMillisBlinkR = millis();
+const int battLow = 410;
+int lowBattery = 0;
 
 // Variables for buttons
 const int ledOut = D0;
@@ -28,7 +42,7 @@ void setup() {
     while (!Serial);
   }
  
-  // set LED pins to output mode
+  // Set LED pins to output mode
   // Red is on, Green and Blue are off
   pinMode(ledR, OUTPUT);
   pinMode(ledG, OUTPUT);
@@ -38,7 +52,12 @@ void setup() {
   digitalWrite(ledG, HIGH);
   digitalWrite(ledB, HIGH);
   digitalWrite(ledOut, LOW);
- 
+
+  // Enable battery monitoring
+  pinMode(PIN_VBAT, INPUT);            //Battery Voltage monitoring pin
+  pinMode(PIN_VBAT_ENABLE, OUTPUT);    //Enable Battery Voltage monitoring pin
+  digitalWrite(PIN_VBAT_ENABLE, LOW);  //Enable
+
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting Bluetooth® Low Energy module failed!");
@@ -76,6 +95,11 @@ void setup() {
 void loop() {
   // poll for Bluetooth® Low Energy events
   BLE.poll();
+  nowMillis = millis();
+  if ((nowMillis - startMillisBatt) >= checkBatteryDelay) {
+    checkVoltage();
+  }
+  blinkRed();
 }
 
 void blePeripheralConnectHandler(BLEDevice central) {
@@ -106,5 +130,31 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
     Serial.println(F("LED Off"));
     digitalWrite(ledB, HIGH);          // will turn the LED off
     digitalWrite(ledOut, LOW);         // turn off external LED
+  }
+}
+
+void checkVoltage() {
+  float voltage = analogRead(PIN_VBAT);
+  Serial.print("Voltage: ");
+  Serial.println(voltage);
+  startMillisBatt = millis();
+  if (voltage < battLow) {
+    lowBattery = 1;  // Set the global variable to blink red when battery is low.
+  } else {
+    lowBattery = 0;
+  }
+}
+
+void blinkRed() {
+  int ledRstatus;
+  if (lowBattery && (nowMillis - startMillisBlinkR) >= blinkDelay) {
+    if (digitalRead(ledR)) {
+      digitalWrite(ledR, LOW);  // will turn the LED on
+      digitalWrite(ledG, LOW);
+    } else {
+      digitalWrite(ledR, HIGH);  // will turn the LED off
+      digitalWrite(ledG, HIGH);
+    }
+    startMillisBlinkR = millis();
   }
 }
