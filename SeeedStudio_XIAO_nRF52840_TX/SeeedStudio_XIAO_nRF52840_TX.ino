@@ -1,5 +1,6 @@
 #include <ArduinoBLE.h>
 #include <Wire.h>
+#include "BattHelp.h"
 
 /*
  * NOTE on built in Seeeduino LEDs:
@@ -15,16 +16,9 @@
 
 boolean debug = false;
 
-BLEDevice peripheral;
+BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 
-// How often should we read battery levels? Right now it is set to 10 minutes.
-const unsigned long checkBatteryDelay = 5000;
-const unsigned long blinkDelay        = 2500;
-unsigned long nowMillis         = millis();
-unsigned long startMillisBatt   = millis();
-unsigned long startMillisBlinkR = millis();
-const int battLow = 410;
-int lowBattery = 0;
+BLEDevice peripheral;
 
 // This will be used to check double-clicks
 unsigned long switchOld   = millis();
@@ -38,6 +32,7 @@ int oldButtonState  = LOW;
 const int ledR = LEDR;  // pin to use for RED LED
 const int ledG = LEDG;  // pin to use for GREEN LED
 const int ledB = LEDB;  // pin to use for BLUE LED
+
 
 void setup() {
   Serial.begin(9600);
@@ -57,9 +52,9 @@ void setup() {
   digitalWrite(ledB, HIGH);
  
   // Enable battery monitoring
-  pinMode(PIN_VBAT, INPUT);            //Battery Voltage monitoring pin
-  pinMode(PIN_VBAT_ENABLE, OUTPUT);    //Enable Battery Voltage monitoring pin
-  digitalWrite(PIN_VBAT_ENABLE, LOW);  //Enable
+  pinMode(PIN_VBAT, INPUT);            // Battery Voltage monitoring pin
+  pinMode(PIN_VBAT_ENABLE, OUTPUT);    // Enable Battery Voltage monitoring pin
+  digitalWrite(PIN_VBAT_ENABLE, LOW);  // Enable
 
   // initialize the Bluetooth® Low Energy hardware
   BLE.begin();
@@ -76,11 +71,8 @@ void setup() {
 void loop() {
   // poll for Bluetooth® Low Energy events
   BLE.poll();
-  nowMillis = millis();
-  if ((nowMillis - startMillisBatt) >= checkBatteryDelay) {
-    checkVoltage();
-  }
-  blinkRed();
+  batt.checkVoltage(PIN_VBAT);
+  batt.blinkLed(ledR, ledG, ledB);
 }
 
 void bleCentralDiscoverHandler(BLEDevice peripheral) {
@@ -206,7 +198,7 @@ void system_control(BLEDevice peripheral) {
   digitalWrite(ledR, LOW);
 }
 
-int checkClick(void) {
+int checkClick() {
   const unsigned long clickPeriod = 400;  // Any two clicks under 400 microseconds is a double-click
   switchNow = millis();
   if (switchOld && (switchNow - switchOld) <= clickPeriod) {
@@ -217,31 +209,5 @@ int checkClick(void) {
     switchOld = switchNow;
     Serial.println("Single click");
     return 0;
-  }
-}
-
-void checkVoltage() {
-  float voltage = analogRead(PIN_VBAT);
-  Serial.print("Voltage: ");
-  Serial.println(voltage);
-  startMillisBatt = millis();
-  if (voltage < battLow) {
-    lowBattery = 1;  // Set the global variable to blink red when battery is low.
-  } else {
-    lowBattery = 0;
-  }
-}
-
-void blinkRed() {
-  int ledRstatus;
-  if (lowBattery && (nowMillis - startMillisBlinkR) >= blinkDelay) {
-    if (digitalRead(ledR)) {
-      digitalWrite(ledR, LOW);  // will turn the LED on
-      digitalWrite(ledG, LOW);
-    } else {
-      digitalWrite(ledR, HIGH);  // will turn the LED off
-      digitalWrite(ledG, HIGH);
-    }
-    startMillisBlinkR = millis();
   }
 }

@@ -1,10 +1,20 @@
 #include "BattHelp.h"
 
+// How often should we read battery levels? Right now it is set to 10 minutes.
+const unsigned long checkBatteryDelay = 5000;
+const unsigned long blinkDelay        = 2500;
+
+// Battery level variables
+const int battLow = 410;
+int       lowBattery = 0;
+
+// Timers
 unsigned long startMillisBatt = 0;
 unsigned long startMillisLED = 0;
-boolean       state = false;
-int           lowBattery = 0;
-const int     battLow = 410;
+
+// LED state
+boolean state = false;
+
 
 BatteryCheck::BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin)
 {
@@ -14,16 +24,16 @@ BatteryCheck::BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin)
   digitalWrite(vbatEnablePin, LOW);  // Bring low to read battery levels
 }
 
-void BatteryCheck::checkVoltage(unsigned vbatPin, unsigned long delay_time) {
+void BatteryCheck::checkVoltage(unsigned vbatPin) {
   unsigned long currentMillis = millis();
-  if (currentMillis - startMillisBatt > delay_time) {
+  if (currentMillis - startMillisBatt > checkBatteryDelay) {
     float voltage = analogRead(vbatPin);
     Serial.print("current: ");
     Serial.println(currentMillis);
     Serial.print("start: ");
     Serial.println(startMillisBatt);
     Serial.print("delay: ");
-    Serial.println(delay_time);
+    Serial.println(checkBatteryDelay);
     Serial.print("Voltage: ");
     Serial.println(voltage);
     startMillisBatt = millis();
@@ -35,12 +45,20 @@ void BatteryCheck::checkVoltage(unsigned vbatPin, unsigned long delay_time) {
   }
 }
 
-void BatteryCheck::blinkRed(unsigned ledPin, unsigned long delay_time) {
+void BatteryCheck::blinkLed(unsigned ledR, unsigned ledG, unsigned ledB) {
   unsigned long currentMillis = millis();
 
-  if (currentMillis - startMillisLED > delay_time) {
+  if (currentMillis - startMillisLED > blinkDelay) {
     state = !state;
-    digitalWrite(ledPin, state);
+    //if (ledR) digitalWrite(ledR, state);
+    //if (ledG) digitalWrite(ledG, state);
+    //if (ledB) digitalWrite(ledB, state);
     startMillisLED = millis();
+    blinkYellow(ledR, ledG);
   }
+}
+
+void blinkYellow(unsigned ledR, unsigned ledG) {
+  if (ledR) digitalWrite(ledR, state);
+  if (ledG) digitalWrite(ledG, state);  
 }

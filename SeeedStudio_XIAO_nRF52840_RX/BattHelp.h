@@ -1,14 +1,14 @@
 #ifndef BattHelp_h
 #define BattHelp_h
-
 #include "Arduino.h"
+
 
 class BatteryCheck
 {
   public:
   BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin);
-  void checkVoltage(unsigned vbatPin, unsigned long delay_time);
-  void blinkRed(unsigned ledPin, unsigned long delay_time);
+  void checkVoltage(unsigned vbatPin);
+  void blinkLed(unsigned ledR, unsigned ledG, unsigned ledB);
 
   private:
   unsigned long startMillisBatt = 0;
@@ -17,5 +17,7 @@ class BatteryCheck
   int           lowBattery = 0;
   const int     battLow = 410;
 };
+
+void blinkYellow(unsigned ledR, unsigned ledG);
 
 #endif

@@ -12,12 +12,10 @@
  * Needs a modified ArduinoCore-mbed. Look at https://github.com/Seeed-Studio/ArduinoCore-mbed/issues/13
  * There is an issue with using LEDG and reading PIN_VBAT in 2.9.1
  */
+ 
 boolean debug = false;
 
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
-
-const unsigned long checkBatteryDelay = 5000;
-const unsigned long blinkDelay        = 2500;
 
 // This UUID must match TX and RX
 BLEService ledService("12b665c3-6546-4d19-8a87-cb2caa590510");
@@ -31,6 +29,7 @@ const int ledOut = D0;
 const int ledR = LEDR;  // pin to use for RED LED
 const int ledG = LEDG;  // pin to use for GREEN LED
 const int ledB = LEDB;  // pin to use for BLUE LED
+
 
 void setup() {
   Serial.begin(9600);
@@ -86,8 +85,8 @@ void setup() {
 void loop() {
   // poll for Bluetooth® Low Energy events
   BLE.poll();
-  batt.checkVoltage(PIN_VBAT, checkBatteryDelay);
-  batt.blinkRed(ledR, blinkDelay);
+  batt.checkVoltage(PIN_VBAT);
+  batt.blinkLed(ledR, ledG, ledB);
 }
 
 void blePeripheralConnectHandler(BLEDevice central) {
