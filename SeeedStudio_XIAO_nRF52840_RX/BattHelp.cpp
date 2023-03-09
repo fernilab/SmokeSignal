@@ -48,17 +48,14 @@ void BatteryCheck::checkVoltage(unsigned vbatPin) {
 void BatteryCheck::blinkLed(unsigned ledR, unsigned ledG, unsigned ledB) {
   unsigned long currentMillis = millis();
 
-  if (currentMillis - startMillisLED > blinkDelay) {
-    state = !state;
-    //if (ledR) digitalWrite(ledR, state);
-    //if (ledG) digitalWrite(ledG, state);
-    //if (ledB) digitalWrite(ledB, state);
+  if (lowBattery && currentMillis - startMillisLED > blinkDelay) {
     startMillisLED = millis();
-    blinkYellow(ledR, ledG);
+    state = !state;
+    blinkYellow(ledR, ledG, state);
   }
 }
 
-void blinkYellow(unsigned ledR, unsigned ledG) {
+void blinkYellow(unsigned ledR, unsigned ledG, boolean state) {
   if (ledR) digitalWrite(ledR, state);
   if (ledG) digitalWrite(ledG, state);  
 }

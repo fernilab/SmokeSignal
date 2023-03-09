@@ -18,6 +18,6 @@ class BatteryCheck
   const int     battLow = 410;
 };
 
-void blinkYellow(unsigned ledR, unsigned ledG);
+void blinkYellow(unsigned ledR, unsigned ledG, boolean state);
 
 #endif
