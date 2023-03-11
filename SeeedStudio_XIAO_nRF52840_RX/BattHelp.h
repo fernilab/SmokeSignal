@@ -3,21 +3,27 @@
 #include "Arduino.h"
 
 
-class BatteryCheck
-{
+class BatteryCheck {
   public:
   BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin);
   void checkVoltage(unsigned vbatPin);
-  void blinkLed(unsigned ledR, unsigned ledG, unsigned ledB);
 
   private:
   unsigned long startMillisBatt = 0;
-  unsigned long startMillisLED = 0;
-  boolean       state = false;
-  int           lowBattery = 0;
-  const int     battLow = 410;
+  const int     battLow = 355;
 };
 
-void blinkYellow(unsigned ledR, unsigned ledG, boolean state);
+class LEDs {
+  public:
+  LEDs(unsigned ledR, unsigned ledG, unsigned ledB);
+  void ledChange(unsigned ledPin, boolean ledState);
+  void battStatus();
+  void connectionUpdate(boolean connectionState);
+  void connectionStatus();
+
+  private:
+  unsigned long startMillisLED = 0;
+  boolean state = false;
+};
 
 #endif

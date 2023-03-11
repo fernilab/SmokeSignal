@@ -1,61 +1,76 @@
 #include "BattHelp.h"
 
-// How often should we read battery levels? Right now it is set to 10 minutes.
-const unsigned long checkBatteryDelay = 5000;
-const unsigned long blinkDelay        = 2500;
+/* How often should we read battery levels and what should the blink delay be? */
+const unsigned long checkBatteryDelay = 15000;
+const unsigned long blinkDelay        = 1000;
 
-// Battery level variables
-const int battLow = 410;
-int       lowBattery = 0;
+/* Battery level variables */
+boolean   lowBattery = false;
 
-// Timers
-unsigned long startMillisBatt = 0;
-unsigned long startMillisLED = 0;
-
-// LED state
-boolean state = false;
+/* Connectivity status */
+boolean connectionStatusFlag = false;
 
 
-BatteryCheck::BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin)
-{
-  // Enable battery monitoring
+BatteryCheck::BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin) {
+  /* Enable battery monitoring */
   pinMode(vbatPin, INPUT);
-  pinMode(vbatEnablePin, OUTPUT);    // Enable Battery Voltage monitoring pin
-  digitalWrite(vbatEnablePin, LOW);  // Bring low to read battery levels
+  pinMode(vbatEnablePin, OUTPUT);    /* Enable Battery Voltage monitoring pin */
+  digitalWrite(vbatEnablePin, LOW);  /* Bring low to read battery levels */
 }
 
 void BatteryCheck::checkVoltage(unsigned vbatPin) {
   unsigned long currentMillis = millis();
   if (currentMillis - startMillisBatt > checkBatteryDelay) {
     float voltage = analogRead(vbatPin);
-    Serial.print("current: ");
-    Serial.println(currentMillis);
-    Serial.print("start: ");
-    Serial.println(startMillisBatt);
-    Serial.print("delay: ");
-    Serial.println(checkBatteryDelay);
     Serial.print("Voltage: ");
     Serial.println(voltage);
     startMillisBatt = millis();
     if (voltage < battLow) {
-      lowBattery = 1;  // Set the global variable to blink red when battery is low.
+      lowBattery = true;
     } else {
-      lowBattery = 0;
+      lowBattery = false;
     }
   }
 }
 
-void BatteryCheck::blinkLed(unsigned ledR, unsigned ledG, unsigned ledB) {
+LEDs::LEDs(unsigned ledR, unsigned ledG, unsigned ledB) {
+  pinMode(ledR, OUTPUT);
+  pinMode(ledG, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  digitalWrite(ledR, LOW);
+  digitalWrite(ledG, HIGH);
+  digitalWrite(ledB, HIGH);
+}
+
+void LEDs::ledChange(unsigned ledPin, boolean ledState) {
+  digitalWrite(ledPin, ledState);
+}
+
+void LEDs::battStatus() {
   unsigned long currentMillis = millis();
 
   if (lowBattery && currentMillis - startMillisLED > blinkDelay) {
     startMillisLED = millis();
     state = !state;
-    blinkYellow(ledR, ledG, state);
+    /* Low battery is threat level yellow */
+    LEDs::ledChange(LEDR, state);
+    LEDs::ledChange(LEDG, state);
   }
 }
 
-void blinkYellow(unsigned ledR, unsigned ledG, boolean state) {
-  if (ledR) digitalWrite(ledR, state);
-  if (ledG) digitalWrite(ledG, state);  
+void LEDs::connectionUpdate(boolean connectionState) {
+  connectionStatusFlag = connectionState;
+  if (connectionStatusFlag) {
+    /* Flash green only briefly to show connected */
+    LEDs::ledChange(LEDR, true);
+    LEDs::ledChange(LEDB, true);
+    LEDs::ledChange(LEDG, false);
+    delay(500);
+    LEDs::ledChange(LEDG, true);
+  }
+}
+
+void LEDs::connectionStatus() {
+  /* Loss of connection is threat level red */
+  if (!connectionStatusFlag) LEDs::ledChange(LEDR, false);
 }
