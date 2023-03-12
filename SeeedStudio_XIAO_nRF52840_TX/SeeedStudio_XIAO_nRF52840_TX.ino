@@ -11,6 +11,7 @@
    There is an issue with using LEDG and reading PIN_VBAT in 2.9.1 */
 
 boolean debug = false;
+String peerMAC = "61:ab:48:aa:b5:6e";
 
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);
@@ -48,6 +49,8 @@ void setup() {
 void loop() {
   /* Poll for Bluetooth® Low Energy events */
   BLE.poll();
+  /* We need to check this regardless of connected status
+     Add the same thing to peripheral.connected loop */
   batt.checkVoltage(PIN_VBAT);
   leds.battStatus();
   leds.connectionStatus();
@@ -82,6 +85,12 @@ void bleCentralDiscoverHandler(BLEDevice peripheral) {
   Serial.print("RSSI: ");
   Serial.println(peripheral.rssi());
   
+  if (!peerMAC.equalsIgnoreCase(peripheral.address())) {
+    Serial.print("Not an allowed peer: ");
+    Serial.println(peerMAC + " =! " + peripheral.address());
+    return;
+  }
+
   if (peripheral.localName() != "SmokeSignal Peripheral") {
     Serial.print("Not SmokeSignal...");
     return;
@@ -163,6 +172,10 @@ void system_control(BLEDevice peripheral) {
         }
       }
     }
+    /* Run admin stuff at the end of button processing */
+    batt.checkVoltage(PIN_VBAT);
+    leds.battStatus();
+    leds.connectionStatus();
   }
 
   Serial.println("Peripheral disconnected");

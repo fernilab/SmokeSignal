@@ -10,6 +10,7 @@
    There is an issue with using LEDG and reading PIN_VBAT in 2.9.1 */
  
 boolean debug = false;
+String peerMAC = "xx:xx:xx:xx:xx:xx";  /* Set peer MAC address for simple allowlist */
 
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);
@@ -75,6 +76,13 @@ void loop() {
 }
 
 void blePeripheralConnectHandler(BLEDevice central) {
+  /* if peerMAC does not match, disconnect */
+  if (!peerMAC.equalsIgnoreCase(central.address())) {
+    Serial.print("Not an allowed peer: ");
+    Serial.println(peerMAC + " =! " + central.address());
+    central.disconnect();
+    return;
+  }
   /* Central connected event handler */
   Serial.print("Connected to central: ");
   Serial.println(central.address());
