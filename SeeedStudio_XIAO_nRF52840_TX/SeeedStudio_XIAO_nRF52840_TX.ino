@@ -11,7 +11,7 @@
    There is an issue with using LEDG and reading PIN_VBAT in 2.9.1 */
 
 boolean debug = false;
-String peerMAC = "61:ab:48:aa:b5:6e";
+String peerMAC = "xx:xx:xx:xx:xx:xx";
 
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);
