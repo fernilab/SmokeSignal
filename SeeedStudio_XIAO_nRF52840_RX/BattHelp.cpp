@@ -1,8 +1,8 @@
 #include "BattHelp.h"
 
 /* How often should we read battery levels and what should the blink delay be? */
-const unsigned long checkBatteryDelay = 15000;
-const unsigned long blinkDelay        = 1000;
+const unsigned long checkBatteryDelay = 30000;
+const unsigned long blinkDelay        = 2000;
 
 /* Battery level variables */
 boolean   lowBattery = false;
