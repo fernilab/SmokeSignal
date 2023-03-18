@@ -13,6 +13,7 @@
 boolean debug = false;
 String peerMAC = "xx:xx:xx:xx:xx:xx";
 
+
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);
 
@@ -44,6 +45,11 @@ void setup() {
 
   /* Start scanning for peripherals */
   BLE.scanForName("SmokeSignal Peripheral");
+
+  /* Print address */
+  Serial.print("Address: ");
+  Serial.println(BLE.address());
+  Serial.println("SmokeSignal nRF52840 Central");
 }
 
 void loop() {

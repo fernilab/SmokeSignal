@@ -9,8 +9,9 @@ class BatteryCheck {
   void checkVoltage(unsigned vbatPin);
 
   private:
-  unsigned long startMillisBatt = 0;
-  const int     battLow = 355;
+  unsigned long startTimeBatt = 0;
+  const int     battLow       = 340;  /* 340 Start battery warnings. */
+  const int     battCritical  = 333;  /* 333 Battery depleated. Shutdown. */
 };
 
 class LEDs {
@@ -22,8 +23,8 @@ class LEDs {
   void connectionStatus();
 
   private:
-  unsigned long startMillisLED = 0;
-  boolean state = false;
+  unsigned long startTimeLED = 0;
+  boolean       state        = false;
 };
 
 #endif
