@@ -59,30 +59,41 @@ void MotionHelp::checkAcc() {
 }
 
 void MotionHelp::goToPowerOff() {
-  Serial.println("Shut down LEDs");
-  digitalWrite(LEDR, HIGH);
-  digitalWrite(LEDG, HIGH);
-  digitalWrite(LEDB, HIGH);
-  Serial.println("Going to System OFF");
+  Serial.println("Shutting down.");
+  sleepBlink();
+  Serial.println("Setting up wakeup call.");
   /* Ensure interrupt pin from IMU is set to wake up device */
   nrf_gpio_cfg_sense_input(digitalPinToInterrupt(PIN_LSM6DS3TR_C_INT1), NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
   /* Brief delay to make sure the changes registered */
   delay(1000);
-  Serial.println("System OFF");
+  Serial.println("Going to system OFF");
   NRF_POWER->SYSTEMOFF = 1;
 }
 
 void MotionHelp::setupTiltInterrupt() {
   // Set accelerometer measurement range and bandwidth
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_CTRL1_XL,    0x11);  /* 12.5Hz, 2g, 400Hz */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_CTRL1_XL,    0x11);  /* 12.5Hz, 2g, 400Hz                                 */
   myIMU.writeRegister(LSM6DS3_ACC_GYRO_TAP_CFG1,    0xEE);  /* INT_EN, acc lo-power, gyro power-down, TAP XYZ EN */
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_TAP_THS_6D,  0x65);  /* D4D_EN, 50 deg */
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_INT_DUR2,    0x7F);  /* Set Duration, Quiet and Shock time windows */
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_WAKE_UP_THS, 0x85);  /* Single & double-tap enabled */
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_MD1_CFG,     0x4E);  /* SINGLE, DOUBLE, 6D, and TILT */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_TAP_THS_6D,  0x61);  /* D4D_EN, 50 deg, bits * 0.03125g                   */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_INT_DUR2,    0x15);  /* DUR: 2.56s, QUIET: .32s, SHOCK: .64s              */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_WAKE_UP_THS, 0x81);  /* SINGNLE DOUBLE EN, bits * .03125g                 */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_MD1_CFG,     0x6E);  /* SINGLE, WU, DOUBLE, 6D, and TILT                  */
 }
 
 void int1ISR()
 {
   interruptCount++;  /* The goggles, they do nothing! */
+}
+
+void sleepBlink() {
+  for (int blinkCounter = 0; blinkCounter <=3; blinkCounter++) {
+    digitalWrite(LEDR, LOW);
+    delay(125);
+    digitalWrite(LEDR, HIGH);
+    delay(125);
+  }
+  /* Turn off LEDs */
+  digitalWrite(LEDR, HIGH);
+  digitalWrite(LEDG, HIGH);
+  digitalWrite(LEDB, HIGH);
 }

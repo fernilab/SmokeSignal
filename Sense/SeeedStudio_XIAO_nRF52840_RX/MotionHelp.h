@@ -16,4 +16,6 @@ class MotionHelp {
 };
 
 void int1ISR();
+
+void sleepBlink();
 #endif
