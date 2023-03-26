@@ -15,7 +15,6 @@
 boolean debug = false;
 String peerMAC = "xx:xx:xx:xx:xx:xx";
 
-
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);
 MotionHelp   mymotion;
