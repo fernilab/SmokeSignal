@@ -72,7 +72,7 @@ void MotionHelp::goToPowerOff() {
 
 void MotionHelp::setupTiltInterrupt() {
   // Set accelerometer measurement range and bandwidth
-  myIMU.writeRegister(LSM6DS3_ACC_GYRO_CTRL1_XL,    0x1A);  /* 12.5Hz, 4g, LPF @50Hz, BW 1.5 kHz                 */
+  myIMU.writeRegister(LSM6DS3_ACC_GYRO_CTRL1_XL,    0x1A);  /* 12.5Hz, 4g, LPF @50Hz, BW @1.5kHz                 */
   myIMU.writeRegister(LSM6DS3_ACC_GYRO_TAP_CFG1,    0xEE);  /* INT_EN, acc lo-power, gyro power-down, TAP XYZ EN */
   myIMU.writeRegister(LSM6DS3_ACC_GYRO_TAP_THS_6D,  0x61);  /* D4D_EN, 50 deg, bits * 0.125g                     */
   myIMU.writeRegister(LSM6DS3_ACC_GYRO_INT_DUR2,    0x15);  /* DUR: 2.56s, QUIET: .32s, SHOCK: .64s              */
