@@ -3,7 +3,6 @@
 #include "BattHelp.h"
 #include "MotionHelp.h"
 
-
 /* NOTE on built in Seeeduino LEDs:
    You first have to understand that the behavior of this LED is not as usual when controlled by the code.
    The LED turns ON when we give a LOW signal and it turns OFF when we give a HIGH signal. 
@@ -197,7 +196,7 @@ void system_control(BLEDevice peripheral) {
 }
 
 int checkClick() {
-  const unsigned long clickPeriod = 400;  // Any two clicks under 400 microseconds is a double-click
+  const unsigned long clickPeriod = 400;  /* Any two clicks under 400 microseconds is a double-click */
   switchNow = millis();
   if (switchOld && (switchNow - switchOld) <= clickPeriod) {
     switchOld = switchNow;

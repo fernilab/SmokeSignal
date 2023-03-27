@@ -189,7 +189,7 @@ void system_control(BLEDevice peripheral) {
 }
 
 int checkClick() {
-  const unsigned long clickPeriod = 400;  // Any two clicks under 400 microseconds is a double-click
+  const unsigned long clickPeriod = 400;  /* Any two clicks under 400 microseconds is a double-click */
   switchNow = millis();
   if (switchOld && (switchNow - switchOld) <= clickPeriod) {
     switchOld = switchNow;

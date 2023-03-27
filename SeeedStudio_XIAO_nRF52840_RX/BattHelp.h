@@ -2,7 +2,6 @@
 #define BattHelp_h
 #include "Arduino.h"
 
-
 class BatteryCheck {
   public:
   BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin);

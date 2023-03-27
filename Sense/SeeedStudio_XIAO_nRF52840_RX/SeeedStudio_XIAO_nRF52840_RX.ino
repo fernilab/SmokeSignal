@@ -2,7 +2,6 @@
 #include "BattHelp.h"
 #include "MotionHelp.h"
 
-
 /* NOTE on built in Seeeduino LEDs:
    You first have to understand that the behavior of this LED is not as usual when controlled by the code.
    The LED turns ON when we give a LOW signal and it turns OFF when we give a HIGH signal.
