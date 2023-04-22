@@ -10,7 +10,7 @@
 /* Needs a modified ArduinoCore-mbed. Look at https://github.com/Seeed-Studio/ArduinoCore-mbed/issues/13
    There is an issue with using LEDG and reading PIN_VBAT in 2.9.1 */
 
-boolean debug = false;
+boolean debug  = false;
 String peerMAC = "xx:xx:xx:xx:xx:xx";
 
 BatteryCheck batt(PIN_VBAT, PIN_VBAT_ENABLE);
@@ -21,6 +21,7 @@ BLEDevice peripheral;
 /* This will be used to check double-clicks */
 unsigned long switchOld   = millis();
 unsigned long switchNow   = millis();
+unsigned long debounceStart = millis();
 
 /* Setup button */
 const int buttonPin = D0;
@@ -42,8 +43,8 @@ void setup() {
   /* Set the discovered event handle */
   BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);
 
-  /* Start scanning for peripherals */
-  BLE.scanForName("SmokeSignal Peripheral");
+  /* Start scanning for peripherals via MAC */
+  BLE.scanForAddress(peerMAC);
 
   /* Print address */
   Serial.print("Address: ");
@@ -167,9 +168,9 @@ void system_control(BLEDevice peripheral) {
         leds.ledChange(LEDB, false);
         /* If there is a double-click enter the loop */
         if (checkClick()) {
-          delay(clickDebounce);  /* We use this for button debounce */
+          debounceStart = millis();
           while(true) {
-            if(!digitalRead(buttonPin)) {
+            if(!digitalRead(buttonPin) && (millis() - debounceStart) >= clickDebounce) {
               Serial.println("New button press.");
               break;
             }

@@ -67,6 +67,8 @@ void MotionHelp::goToPowerOff() {
   /* Brief delay to make sure the changes registered */
   delay(1000);
   Serial.println("Going to system OFF");
+  __WFE();
+  __WFI();
   NRF_POWER->SYSTEMOFF = 1;
 }
 
@@ -96,4 +98,5 @@ void sleepBlink() {
   digitalWrite(LEDR, HIGH);
   digitalWrite(LEDG, HIGH);
   digitalWrite(LEDB, HIGH);
+  delay(1000);
 }

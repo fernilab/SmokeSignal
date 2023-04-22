@@ -10,8 +10,8 @@
 /* Needs a modified ArduinoCore-mbed. Look at https://github.com/Seeed-Studio/ArduinoCore-mbed/issues/13
    There is an issue with using LEDG and reading PIN_VBAT in 2.9.1 */
 
-boolean debug = false;
-String peerMAC = "xx:xx:xx:xx:xx:xx";  /* Set peer MAC address for simple allowlist */
+boolean debug  = false;
+String peerMAC = "xx:xx:xx:xx:xx:xx";
 
 BatteryCheck batts(PIN_VBAT, PIN_VBAT_ENABLE);
 LEDs         leds(LEDR, LEDG, LEDB);

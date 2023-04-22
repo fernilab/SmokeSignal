@@ -1,13 +1,13 @@
 #include "BattHelp.h"
 
-/* How often should we read battery levels and what should the blink delay be? */
-const unsigned long checkBatteryDelay = 60000;  /* Check every 60 seconds */
+/* How often should we read battery levels and what should the blink delay be?                */
+const unsigned long checkBatteryDelay = 60000;  /* Check every 60 seconds                     */
 const unsigned long blinkDelay        = 20000;  /* When battery is low blink every 20 seconds */
 
 /* Battery level variables */
 int                 blinkCount     = 0;         /* This will keep track of blinks */
 unsigned long       blinkStartTime = 0;
-boolean             lowBattery     = false;     /* When this is set, start blinking */
+boolean             lowBattery     = false;     /* When this is set, start blinking  */
 const unsigned long strobeDelay    = 125;       /* Delay in millis for strobe effect */
 
 /* Connectivity status */
@@ -18,7 +18,8 @@ BatteryCheck::BatteryCheck(unsigned vbatPin, unsigned vbatEnablePin) {
   /* Enable battery monitoring */
   pinMode(vbatPin, INPUT);
   pinMode(vbatEnablePin, OUTPUT);    /* Enable Battery Voltage monitoring pin */
-  digitalWrite(vbatEnablePin, LOW);  /* Bring low to read battery levels */
+  digitalWrite(vbatEnablePin, LOW);  /* Bring low to read battery levels      */
+  digitalWrite(P0_13, LOW);          /* High charging current                 */
 }
 
 void BatteryCheck::checkVoltage(unsigned vbatPin) {

@@ -11,8 +11,8 @@ class MotionHelp {
     void goToPowerOff();
     void setupTiltInterrupt();
   private:
-    LSM6DS3   myIMU;
-    const unsigned long sleepyTime = 7200000; /* Sleep after 2 hours (7200000 ms) */
+    LSM6DS3 myIMU;
+    const unsigned long sleepyTime = 3600000; /* Sleep after 1 hour (3600000 ms) */
 };
 
 void int1ISR();
